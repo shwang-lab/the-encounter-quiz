@@ -8,10 +8,6 @@ const pwInput = document.getElementById("pw-input");
 const gateError = document.getElementById("gate-error");
 const btnUnlock = document.getElementById("btn-unlock");
 
-const codeInput = document.getElementById("code-input");
-const btnSetCode = document.getElementById("btn-set-code");
-const codeStatus = document.getElementById("code-status");
-
 const statCount = document.getElementById("stat-count");
 const statAvg = document.getElementById("stat-avg");
 
@@ -29,42 +25,12 @@ function unlock() {
   if (pwInput.value === INSTRUCTOR_PASSWORD) {
     screenGate.hidden = true;
     screenDashboard.hidden = false;
-    loadCode();
     loadResults();
   } else {
     gateError.textContent = "Incorrect password.";
     gateError.hidden = false;
   }
 }
-
-// ---------- Class code ----------
-async function loadCode() {
-  try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=getCode`);
-    const data = await res.json();
-    codeInput.value = data.code || "";
-    codeStatus.textContent = `Current code: ${data.code || "(not set)"}`;
-  } catch (err) {
-    codeStatus.textContent = "Could not load the code. Check the APPS_SCRIPT_URL setting.";
-  }
-}
-
-btnSetCode.addEventListener("click", async () => {
-  const code = codeInput.value.trim();
-  if (!code) return;
-  btnSetCode.disabled = true;
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "setCode", code, password: INSTRUCTOR_PASSWORD })
-    });
-    codeStatus.textContent = `Code set to "${code}".`;
-  } catch (err) {
-    codeStatus.textContent = "Failed to set the code.";
-  }
-  btnSetCode.disabled = false;
-});
 
 // ---------- Results ----------
 btnRefresh.addEventListener("click", loadResults);
