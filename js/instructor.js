@@ -35,7 +35,7 @@ function unlock() {
     loadCode();
     loadResults();
   } else {
-    gateError.textContent = "비밀번호가 올바르지 않습니다.";
+    gateError.textContent = "Incorrect password.";
     gateError.hidden = false;
   }
 }
@@ -46,9 +46,9 @@ async function loadCode() {
     const res = await fetch(`${APPS_SCRIPT_URL}?action=getCode`);
     const data = await res.json();
     codeInput.value = data.code || "";
-    codeStatus.textContent = `현재 코드: ${data.code || "(설정 안됨)"}`;
+    codeStatus.textContent = `Current code: ${data.code || "(not set)"}`;
   } catch (err) {
-    codeStatus.textContent = "코드를 불러오지 못했습니다. APPS_SCRIPT_URL 설정을 확인하세요.";
+    codeStatus.textContent = "Could not load the code. Check the APPS_SCRIPT_URL setting.";
   }
 }
 
@@ -62,9 +62,9 @@ btnSetCode.addEventListener("click", async () => {
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ action: "setCode", code, password: INSTRUCTOR_PASSWORD })
     });
-    codeStatus.textContent = `코드가 "${code}"로 설정되었습니다.`;
+    codeStatus.textContent = `Code set to "${code}".`;
   } catch (err) {
-    codeStatus.textContent = "코드 설정에 실패했습니다.";
+    codeStatus.textContent = "Failed to set the code.";
   }
   btnSetCode.disabled = false;
 });
@@ -73,7 +73,7 @@ btnSetCode.addEventListener("click", async () => {
 btnRefresh.addEventListener("click", loadResults);
 
 async function loadResults() {
-  tableWrap.innerHTML = `<p class="hint">불러오는 중...</p>`;
+  tableWrap.innerHTML = `<p class="hint">Loading...</p>`;
   try {
     const res = await fetch(`${APPS_SCRIPT_URL}?action=getResults&password=${encodeURIComponent(INSTRUCTOR_PASSWORD)}`);
     const data = await res.json();
@@ -84,12 +84,11 @@ async function loadResults() {
     latestResults = data.results || [];
     renderDashboard();
   } catch (err) {
-    tableWrap.innerHTML = `<p class="error-msg">결과를 불러오지 못했습니다. APPS_SCRIPT_URL 설정을 확인하세요.</p>`;
+    tableWrap.innerHTML = `<p class="error-msg">Could not load results. Check the APPS_SCRIPT_URL setting.</p>`;
   }
 }
 
 function renderDashboard() {
-  // Stats
   statCount.textContent = latestResults.length;
   if (latestResults.length > 0) {
     const avg = latestResults.reduce((sum, r) => sum + Number(r.Score || 0), 0) / latestResults.length;
@@ -98,13 +97,11 @@ function renderDashboard() {
     statAvg.textContent = "–";
   }
 
-  // Build lookup of submitted names
   const submittedByName = {};
   latestResults.forEach(r => { submittedByName[r.Name] = r; });
 
-  // Table
   let html = `<table><thead><tr>
-    <th>이름</th><th>점수</th><th>제출 시각</th><th></th>
+    <th>Name</th><th>Score</th><th>Submitted At</th><th></th>
   </tr></thead><tbody>`;
 
   STUDENTS.slice().sort((a, b) => a.localeCompare(b, "ko")).forEach((name, i) => {
@@ -116,13 +113,13 @@ function renderDashboard() {
         <td>${escapeHtml(name)}</td>
         <td class="score-cell">${r.Score} / ${r.Total}</td>
         <td>${ts}</td>
-        <td><button class="detail-toggle" data-target="${rowId}">문항별 답 보기</button></td>
+        <td><button class="detail-toggle" data-target="${rowId}">View Answers</button></td>
       </tr>
       <tr class="detail-row" id="${rowId}" hidden><td colspan="4">${renderAnswerDetail(r)}</td></tr>`;
     } else {
       html += `<tr class="missing">
         <td>${escapeHtml(name)}</td>
-        <td>미제출</td>
+        <td>Not submitted</td>
         <td>–</td>
         <td></td>
       </tr>`;
@@ -136,7 +133,7 @@ function renderDashboard() {
     btn.addEventListener("click", () => {
       const row = document.getElementById(btn.dataset.target);
       row.hidden = !row.hidden;
-      btn.textContent = row.hidden ? "문항별 답 보기" : "문항별 답 숨기기";
+      btn.textContent = row.hidden ? "View Answers" : "Hide Answers";
     });
   });
 }
@@ -150,7 +147,7 @@ function renderAnswerDetail(r) {
     const letter = selected !== undefined ? "ABCD"[selected] : "–";
     const isCorrect = selected === q.correct;
     const cls = selected === undefined ? "" : (isCorrect ? "right" : "wrong");
-    return `<div class="${cls}">${q.num}. ${letter}${selected === undefined ? " (미답)" : (isCorrect ? "" : ` (정답 ${"ABCD"[q.correct]})`)}</div>`;
+    return `<div class="${cls}">${q.num}. ${letter}${selected === undefined ? " (no answer)" : (isCorrect ? "" : ` (correct: ${"ABCD"[q.correct]})`)}</div>`;
   }).join("");
 
   return `<div class="detail-grid">${items}</div>`;
