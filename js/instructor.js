@@ -14,13 +14,10 @@ const codeStatus = document.getElementById("code-status");
 
 const statCount = document.getElementById("stat-count");
 const statAvg = document.getElementById("stat-avg");
-const statTotal = document.getElementById("stat-total");
 
 const btnRefresh = document.getElementById("btn-refresh");
 const btnExportCsv = document.getElementById("btn-export-csv");
 const tableWrap = document.getElementById("table-wrap");
-
-statTotal.textContent = STUDENTS.length;
 
 let latestResults = [];
 
@@ -89,6 +86,7 @@ async function loadResults() {
 }
 
 function renderDashboard() {
+  // Stats
   statCount.textContent = latestResults.length;
   if (latestResults.length > 0) {
     const avg = latestResults.reduce((sum, r) => sum + Number(r.Score || 0), 0) / latestResults.length;
@@ -97,34 +95,28 @@ function renderDashboard() {
     statAvg.textContent = "–";
   }
 
-  const submittedByName = {};
-  latestResults.forEach(r => { submittedByName[r.Name] = r; });
-
+  // Table — only actual submissions, newest first. No fixed roster:
+  // students type their own name freely, so there's nothing to compare against.
   let html = `<table><thead><tr>
     <th>Name</th><th>Score</th><th>Submitted At</th><th></th>
   </tr></thead><tbody>`;
 
-  STUDENTS.slice().sort((a, b) => a.localeCompare(b, "ko")).forEach((name, i) => {
-    const r = submittedByName[name];
-    const rowId = `detail-${i}`;
-    if (r) {
+  if (latestResults.length === 0) {
+    html += `<tr><td colspan="4" class="hint">No submissions yet.</td></tr>`;
+  } else {
+    const sorted = latestResults.slice().sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp));
+    sorted.forEach((r, i) => {
+      const rowId = `detail-${i}`;
       const ts = r.Timestamp ? new Date(r.Timestamp).toLocaleString() : "";
       html += `<tr>
-        <td>${escapeHtml(name)}</td>
+        <td>${escapeHtml(r.Name)}</td>
         <td class="score-cell">${r.Score} / ${r.Total}</td>
         <td>${ts}</td>
         <td><button class="detail-toggle" data-target="${rowId}">View Answers</button></td>
       </tr>
       <tr class="detail-row" id="${rowId}" hidden><td colspan="4">${renderAnswerDetail(r)}</td></tr>`;
-    } else {
-      html += `<tr class="missing">
-        <td>${escapeHtml(name)}</td>
-        <td>Not submitted</td>
-        <td>–</td>
-        <td></td>
-      </tr>`;
-    }
-  });
+    });
+  }
 
   html += `</tbody></table>`;
   tableWrap.innerHTML = html;
