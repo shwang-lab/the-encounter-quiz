@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instructor — The Encounter Quiz</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/instructor.css">
+</head>
+<body>
+
+<div class="wrap wrap-wide">
+
+  <!-- ============ GATE ============ -->
+  <section id="screen-gate" class="screen">
+    <p class="kicker">Instructor Only</p>
+    <h1>채점자 페이지</h1>
+    <p class="subtitle">The Encounter — Listening Quiz</p>
+
+    <div class="card">
+      <label for="pw-input">비밀번호</label>
+      <input type="password" id="pw-input" autocomplete="off">
+      <p id="gate-error" class="error-msg" hidden></p>
+      <button id="btn-unlock" class="btn btn-primary mt">입장</button>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="screen-dashboard" class="screen" hidden>
+    <p class="kicker">Instructor Dashboard</p>
+    <h1>The Encounter — 채점 현황</h1>
+
+    <div class="card code-card">
+      <label for="code-input">오늘의 클래스 코드</label>
+      <div class="code-row">
+        <input type="text" id="code-input" placeholder="예: 0915">
+        <button id="btn-set-code" class="btn btn-secondary">코드 설정</button>
+      </div>
+      <p id="code-status" class="hint"></p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat"><span id="stat-count">0</span><label>제출 인원</label></div>
+      <div class="stat"><span id="stat-avg">–</span><label>평균 점수</label></div>
+      <div class="stat"><span id="stat-total">26</span><label>전체 학생 수</label></div>
+    </div>
+
+    <div class="table-toolbar">
+      <button id="btn-refresh" class="btn btn-secondary">새로고침</button>
+      <button id="btn-export-csv" class="btn btn-secondary">CSV 다운로드</button>
+    </div>
+
+    <div id="table-wrap"></div>
+  </section>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/students.js"></script>
+<script src="js/quiz-data.js"></script>
+<script src="js/instructor.js"></script>
+</body>
+</html>

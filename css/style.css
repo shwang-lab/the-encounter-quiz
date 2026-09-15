@@ -1,0 +1,290 @@
+/* ============================================================
+   The Encounter — Listening Quiz
+   Palette: paper background, ink text, wine accent (primary
+   action / correct-state), deep teal accent (audio controls).
+   ============================================================ */
+
+:root {
+  --paper: #faf8f4;
+  --paper-raised: #ffffff;
+  --ink: #221f1c;
+  --ink-soft: #5a534c;
+  --line: #e3ddd2;
+  --wine: #7a2e2e;
+  --wine-dark: #5e2222;
+  --teal: #2f5d62;
+  --teal-dark: #234548;
+  --amber: #b8862f;
+  --error: #b3261e;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", Pretendard, Helvetica, Arial, sans-serif;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 20px 100px;
+}
+
+.screen[hidden] { display: none; }
+
+.kicker {
+  text-transform: none;
+  color: var(--wine);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  margin: 0 0 6px;
+}
+
+h1 {
+  font-size: 34px;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--ink-soft);
+  margin: 0 0 28px;
+  font-size: 16px;
+}
+
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px;
+}
+
+.card.center { text-align: center; }
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+label.mt { margin-top: 22px; }
+
+select, input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: inherit;
+}
+
+select:focus, input[type="text"]:focus,
+button:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.btn {
+  display: inline-block;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--wine);
+  color: #fff;
+  width: 100%;
+}
+.btn-primary:hover { background: var(--wine-dark); }
+.btn-primary:disabled { background: #c9b8b8; cursor: not-allowed; }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--teal);
+  border: 1.5px solid var(--teal);
+}
+.btn-secondary:hover { background: #eef3f3; }
+
+.mt { margin-top: 20px; }
+
+.error-msg {
+  color: var(--error);
+  font-size: 14px;
+  margin: 10px 0 0;
+}
+
+/* ---------- Quiz header ---------- */
+
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.progress-wrap { min-width: 180px; text-align: right; }
+#progress-text { font-size: 13px; color: var(--ink-soft); }
+
+.progress-bar {
+  width: 180px;
+  height: 6px;
+  background: var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+#progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--teal);
+  transition: width 0.2s ease;
+}
+
+.instructions {
+  color: var(--ink-soft);
+  font-size: 15px;
+  margin: 18px 0 28px;
+  padding: 12px 16px;
+  background: #f1ece2;
+  border-left: 3px solid var(--amber);
+  border-radius: 4px;
+}
+
+/* ---------- Blocks / questions ---------- */
+
+.block {
+  margin-bottom: 34px;
+}
+
+.audio-player {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--teal-dark);
+  color: #fff;
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+
+.audio-player .label {
+  font-size: 13px;
+  opacity: 0.85;
+  flex: 1;
+}
+
+.play-btn {
+  background: #fff;
+  color: var(--teal-dark);
+  border: none;
+  border-radius: 20px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.play-btn:disabled {
+  background: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.7);
+  cursor: not-allowed;
+}
+.play-btn.playing {
+  background: rgba(255,255,255,0.5);
+}
+
+.question {
+  border-bottom: 1px solid var(--line);
+  padding: 18px 0;
+}
+.question:last-child { border-bottom: none; }
+
+.q-prompt {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.q-num {
+  color: var(--wine);
+  margin-right: 6px;
+}
+
+.options { display: grid; gap: 8px; }
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+.option:hover { border-color: var(--teal); }
+.option.selected {
+  border-color: var(--wine);
+  background: #f7eeee;
+}
+.option input { margin-top: 3px; flex-shrink: 0; }
+
+/* ---------- Submit zone ---------- */
+
+.submit-zone {
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(to top, var(--paper) 70%, transparent);
+  padding: 20px 0 10px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.submit-zone .btn { flex: 1; min-width: 160px; }
+
+.done-note {
+  color: var(--ink-soft);
+  margin-top: 10px;
+}
+
+#score-display {
+  color: var(--wine);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 480px) {
+  .wrap { padding: 24px 16px 90px; }
+  h1 { font-size: 28px; }
+  .card { padding: 20px; }
+  .progress-wrap { text-align: left; }
+  .progress-bar, .progress-wrap { width: 100%; }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
