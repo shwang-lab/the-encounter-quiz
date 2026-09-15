@@ -45,39 +45,37 @@ btnLogin.addEventListener("click", async () => {
   const code = classCodeInput.value.trim();
 
   if (!name) {
-    showLoginError("이름을 선택해주세요.");
+    showLoginError("Please select your name.");
     return;
   }
   if (!code) {
-    showLoginError("오늘의 클래스 코드를 입력해주세요.");
+    showLoginError("Please enter today's class code.");
     return;
   }
 
   btnLogin.disabled = true;
-  btnLogin.textContent = "확인 중...";
+  btnLogin.textContent = "Checking...";
 
   try {
     const validCode = await fetchTodayCode();
     if (validCode === null) {
-      // Backend not reachable / not configured — warn but don't hard-block
-      // so a misconfigured Apps Script URL doesn't lock everyone out during setup.
-      showLoginError("코드를 확인할 수 없습니다. 선생님께 문의하세요. (관리자: config.js의 APPS_SCRIPT_URL 확인)");
+      showLoginError("Unable to verify the code. Please ask your teacher. (Admin: check APPS_SCRIPT_URL in config.js)");
       btnLogin.disabled = false;
-      btnLogin.textContent = "시험 입장";
+      btnLogin.textContent = "Start Quiz";
       return;
     }
     if (code !== validCode) {
-      showLoginError("클래스 코드가 올바르지 않습니다.");
+      showLoginError("That class code is not correct.");
       btnLogin.disabled = false;
-      btnLogin.textContent = "시험 입장";
+      btnLogin.textContent = "Start Quiz";
       return;
     }
     state.studentName = name;
     startQuiz();
   } catch (err) {
-    showLoginError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+    showLoginError("A network error occurred. Please try again.");
     btnLogin.disabled = false;
-    btnLogin.textContent = "시험 입장";
+    btnLogin.textContent = "Start Quiz";
   }
 });
 
@@ -109,16 +107,15 @@ function renderQuizBlocks() {
     const blockEl = document.createElement("div");
     blockEl.className = "block";
 
-    // Audio player
     const nums = block.questions.map(q => q.num);
     const label = nums.length > 1
-      ? `문제 ${nums[0]}–${nums[nums.length - 1]}번 오디오`
-      : `문제 ${nums[0]}번 오디오`;
+      ? `Audio for Questions ${nums[0]}–${nums[nums.length - 1]}`
+      : `Audio for Question ${nums[0]}`;
 
     const playerEl = document.createElement("div");
     playerEl.className = "audio-player";
     playerEl.innerHTML = `
-      <button class="play-btn" data-audio="${block.audio}">▶ 재생 (2/2 가능)</button>
+      <button class="play-btn" data-audio="${block.audio}">▶ Play (2/2 available)</button>
       <span class="label">${label}</span>
       <audio preload="none" src="${block.audio}"></audio>
     `;
@@ -135,7 +132,7 @@ function renderQuizBlocks() {
       state.playCounts[block.audio]++;
       playBtn.disabled = true;
       playBtn.classList.add("playing");
-      playBtn.textContent = "재생 중...";
+      playBtn.textContent = "Playing...";
     });
 
     audioEl.addEventListener("ended", () => {
@@ -144,14 +141,13 @@ function renderQuizBlocks() {
       playBtn.classList.remove("playing");
       if (left > 0) {
         playBtn.disabled = false;
-        playBtn.textContent = `▶ 다시 재생 (${left}/${MAX_PLAYS_PER_AUDIO} 가능)`;
+        playBtn.textContent = `▶ Play again (${left}/${MAX_PLAYS_PER_AUDIO} available)`;
       } else {
         playBtn.disabled = true;
-        playBtn.textContent = `재생 완료 (${MAX_PLAYS_PER_AUDIO}/${MAX_PLAYS_PER_AUDIO})`;
+        playBtn.textContent = `Done playing (${MAX_PLAYS_PER_AUDIO}/${MAX_PLAYS_PER_AUDIO})`;
       }
     });
 
-    // Questions in this block
     block.questions.forEach(q => {
       const qEl = document.createElement("div");
       qEl.className = "question";
@@ -188,7 +184,7 @@ function renderQuizBlocks() {
 
 function updateProgress() {
   const answered = Object.keys(state.answers).length;
-  progressText.textContent = `${answered} / ${TOTAL_QUESTIONS} 답변`;
+  progressText.textContent = `${answered} / ${TOTAL_QUESTIONS} answered`;
   progressFill.style.width = `${(answered / TOTAL_QUESTIONS) * 100}%`;
 }
 
@@ -250,7 +246,7 @@ btnPdf.addEventListener("click", () => {
 
     if (selected === undefined) {
       doc.setTextColor(180, 40, 30);
-      doc.text("   (답변하지 않음)", marginX, y);
+      doc.text("   (not answered)", marginX, y);
       doc.setTextColor(0, 0, 0);
       y += lineHeight;
     }
@@ -266,51 +262,4 @@ btnPdf.addEventListener("click", () => {
 btnSubmit.addEventListener("click", async () => {
   const answered = Object.keys(state.answers).length;
   if (answered < TOTAL_QUESTIONS) {
-    submitWarning.textContent = `아직 ${TOTAL_QUESTIONS - answered}문항에 답하지 않았습니다. 제출하시겠습니까? 다시 누르면 제출됩니다.`;
-    submitWarning.hidden = false;
-    if (!btnSubmit.dataset.confirmArmed) {
-      btnSubmit.dataset.confirmArmed = "1";
-      return;
-    }
-  }
-
-  btnSubmit.disabled = true;
-  btnPdf.disabled = true;
-  btnSubmit.textContent = "제출 중...";
-
-  let score = 0;
-  QUIZ_QUESTIONS.forEach(q => {
-    if (state.answers[q.num] === q.correct) score++;
-  });
-
-  const payload = {
-    action: "submit",
-    name: state.studentName,
-    score,
-    total: TOTAL_QUESTIONS,
-    answers: state.answers
-  };
-
-  try {
-    if (APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
-      await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoids CORS preflight
-        body: JSON.stringify(payload)
-      });
-    }
-  } catch (err) {
-    // Even if the network call fails, still show the student their result
-    // and let the PDF be their record. The instructor can request a re-send.
-    console.error("Submit failed:", err);
-  }
-
-  showDoneScreen(score);
-});
-
-function showDoneScreen(score) {
-  screenQuiz.hidden = true;
-  screenDone.hidden = false;
-  scoreDisplay.textContent = `${score} / ${TOTAL_QUESTIONS}`;
-  doneName.textContent = state.studentName;
-}
+    submitWarning.textContent = `You still have ${TOTAL_QUESTIONS - answered} unanswered question(s). Submit
