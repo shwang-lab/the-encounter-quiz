@@ -5,7 +5,7 @@
 
 // Paste the Web App URL you get after deploying Apps Script here.
 // Example: "https://script.google.com/macros/s/AKfycb.../exec"
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPIVMNk_HzmGequ49mFI9dkzaIwL9zZxzJ2jZzgYvrXtMFJ461ThZbetHLw-cUYgUgoQ/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5dppkMTTa5R9ZLye3lqA_r6Kx3au1rNr471yvoRII_LsukWfklFAZdIBBNghHSriJcQ/exec";
 
 // Instructor page password (client-side gate only — see README
 // for the security note on why this is not a strong lock).
