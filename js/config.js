@@ -10,3 +10,7 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPIVMNk_HzmGeq
 // Instructor page password (client-side gate only — see README
 // for the security note on why this is not a strong lock).
 const INSTRUCTOR_PASSWORD = "EngthruFilms100";
+
+// Student login password (shared by everyone). Change this line
+// any time you want a new password — no other file needs to change.
+const STUDENT_PASSWORD = "encounter2026";
