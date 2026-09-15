@@ -17,13 +17,11 @@
     <p class="subtitle">Listening Comprehension Quiz · 25 Questions</p>
 
     <div class="card">
-      <label for="student-select">Select your name</label>
-      <select id="student-select">
-        <option value="" disabled selected>Choose from the class list...</option>
-      </select>
+      <label for="student-name-input">Enter your name</label>
+      <input type="text" id="student-name-input" placeholder="Type your full name" autocomplete="off">
 
-      <label for="class-code" class="mt">Today's class code</label>
-      <input type="text" id="class-code" placeholder="Enter the code your teacher gave you" autocomplete="off">
+      <label for="class-code" class="mt">Password</label>
+      <input type="text" id="class-code" placeholder="Enter the password your teacher gave you" autocomplete="off">
 
       <p id="login-error" class="error-msg" hidden></p>
 
@@ -70,9 +68,8 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="js/config.js?v=2"></script>
-<script src="js/students.js?v=2"></script>
-<script src="js/quiz-data.js?v=2"></script>
-<script src="js/app.js?v=2"></script>
+<script src="js/config.js?v=3"></script>
+<script src="js/quiz-data.js?v=3"></script>
+<script src="js/app.js?v=3"></script>
 </body>
 </html>

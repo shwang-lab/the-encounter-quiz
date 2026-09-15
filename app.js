@@ -14,7 +14,7 @@ const screenLogin = document.getElementById("screen-login");
 const screenQuiz = document.getElementById("screen-quiz");
 const screenDone = document.getElementById("screen-done");
 
-const studentSelect = document.getElementById("student-select");
+const studentNameInput = document.getElementById("student-name-input");
 const classCodeInput = document.getElementById("class-code");
 const loginError = document.getElementById("login-error");
 const btnLogin = document.getElementById("btn-login");
@@ -31,66 +31,31 @@ const submitWarning = document.getElementById("submit-warning");
 const scoreDisplay = document.getElementById("score-display");
 const doneName = document.getElementById("done-name");
 
-// ---------- Populate student dropdown ----------
-STUDENTS.slice().sort((a, b) => a.localeCompare(b, "ko")).forEach(name => {
-  const opt = document.createElement("option");
-  opt.value = name;
-  opt.textContent = name;
-  studentSelect.appendChild(opt);
-});
-
 // ---------- Login ----------
-btnLogin.addEventListener("click", async () => {
-  const name = studentSelect.value;
+btnLogin.addEventListener("click", () => {
+  const name = studentNameInput.value.trim();
   const code = classCodeInput.value.trim();
 
   if (!name) {
-    showLoginError("Please select your name.");
+    showLoginError("Please enter your name.");
     return;
   }
   if (!code) {
-    showLoginError("Please enter today's class code.");
+    showLoginError("Please enter the password.");
+    return;
+  }
+  if (code !== STUDENT_PASSWORD) {
+    showLoginError("That password is not correct.");
     return;
   }
 
-  btnLogin.disabled = true;
-  btnLogin.textContent = "Checking...";
-
-  try {
-    const validCode = await fetchTodayCode();
-    if (validCode === null) {
-      // Backend not reachable / not configured — warn but don't hard-block
-      // so a misconfigured Apps Script URL doesn't lock everyone out during setup.
-      showLoginError("Unable to verify the code. Please ask your teacher. (Admin: check APPS_SCRIPT_URL in config.js)");
-      btnLogin.disabled = false;
-      btnLogin.textContent = "Start Quiz";
-      return;
-    }
-    if (code !== validCode) {
-      showLoginError("That class code is not correct.");
-      btnLogin.disabled = false;
-      btnLogin.textContent = "Start Quiz";
-      return;
-    }
-    state.studentName = name;
-    startQuiz();
-  } catch (err) {
-    showLoginError("A network error occurred. Please try again.");
-    btnLogin.disabled = false;
-    btnLogin.textContent = "Start Quiz";
-  }
+  state.studentName = name;
+  startQuiz();
 });
 
 function showLoginError(msg) {
   loginError.textContent = msg;
   loginError.hidden = false;
-}
-
-async function fetchTodayCode() {
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("PASTE_YOUR")) return null;
-  const res = await fetch(`${APPS_SCRIPT_URL}?action=getCode`);
-  const data = await res.json();
-  return (data.code || "").toString().trim();
 }
 
 // ---------- Build quiz screen ----------
