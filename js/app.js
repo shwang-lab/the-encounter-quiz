@@ -1,15 +1,15 @@
+javascript
 // ============================================================
 // The Encounter — Listening Quiz — student app logic
 // ============================================================
 
 const state = {
   studentName: null,
-  answers: {},        // { questionNum: selectedIndex }
-  playCounts: {},      // { audioSrc: number of plays used }
+  answers: {},
+  playCounts: {},
   submitted: false
 };
 
-// ---------- DOM refs ----------
 const screenLogin = document.getElementById("screen-login");
 const screenQuiz = document.getElementById("screen-quiz");
 const screenDone = document.getElementById("screen-done");
@@ -31,7 +31,6 @@ const submitWarning = document.getElementById("submit-warning");
 const scoreDisplay = document.getElementById("score-display");
 const doneName = document.getElementById("done-name");
 
-// ---------- Populate student dropdown ----------
 STUDENTS.slice().sort((a, b) => a.localeCompare(b, "ko")).forEach(name => {
   const opt = document.createElement("option");
   opt.value = name;
@@ -39,7 +38,6 @@ STUDENTS.slice().sort((a, b) => a.localeCompare(b, "ko")).forEach(name => {
   studentSelect.appendChild(opt);
 });
 
-// ---------- Login ----------
 btnLogin.addEventListener("click", async () => {
   const name = studentSelect.value;
   const code = classCodeInput.value.trim();
@@ -91,7 +89,6 @@ async function fetchTodayCode() {
   return (data.code || "").toString().trim();
 }
 
-// ---------- Build quiz screen ----------
 function startQuiz() {
   screenLogin.hidden = true;
   screenQuiz.hidden = false;
@@ -194,7 +191,6 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// ---------- PDF export ----------
 btnPdf.addEventListener("click", () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
@@ -254,12 +250,56 @@ btnPdf.addEventListener("click", () => {
     y += lineHeight * 0.6;
   });
 
-  const safeName = state.studentName.replace(/[^\w가-힣]+/g, "_");
+  const safeName = state.studentName.replace(/[^\w]+/g, "_");
   doc.save(`Encounter_Quiz_${safeName}.pdf`);
 });
 
-// ---------- Submit ----------
 btnSubmit.addEventListener("click", async () => {
   const answered = Object.keys(state.answers).length;
   if (answered < TOTAL_QUESTIONS) {
-    submitWarning.textContent = `You still have ${TOTAL_QUESTIONS - answered} unanswered question(s). Submit
+    submitWarning.textContent = `You still have ${TOTAL_QUESTIONS - answered} unanswered question(s). Submit anyway? Click Submit again to confirm.`;
+    submitWarning.hidden = false;
+    if (!btnSubmit.dataset.confirmArmed) {
+      btnSubmit.dataset.confirmArmed = "1";
+      return;
+    }
+  }
+
+  btnSubmit.disabled = true;
+  btnPdf.disabled = true;
+  btnSubmit.textContent = "Submitting...";
+
+  let score = 0;
+  QUIZ_QUESTIONS.forEach(q => {
+    if (state.answers[q.num] === q.correct) score++;
+  });
+
+  const payload = {
+    action: "submit",
+    name: state.studentName,
+    score,
+    total: TOTAL_QUESTIONS,
+    answers: state.answers
+  };
+
+  try {
+    if (APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
+      await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+    }
+  } catch (err) {
+    console.error("Submit failed:", err);
+  }
+
+  showDoneScreen(score);
+});
+
+function showDoneScreen(score) {
+  screenQuiz.hidden = true;
+  screenDone.hidden = false;
+  scoreDisplay.textContent = `${score} / ${TOTAL_QUESTIONS}`;
+  doneName.textContent = state.studentName;
+}
