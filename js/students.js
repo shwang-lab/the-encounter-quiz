@@ -29,5 +29,6 @@ const STUDENTS = [
   "Niken Klasiana Sharon Rihi",
   "Noela Xppraya Asa Kardina",
   "Rambu Yana Magdalena Yohanes",
-  "Valentsia Eoudia Darmawan"
+  "Valentsia Eoudia Darmawan",
+  "Teacher"
 ];
