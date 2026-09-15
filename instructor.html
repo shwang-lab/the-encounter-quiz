@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,40 +14,40 @@
   <!-- ============ GATE ============ -->
   <section id="screen-gate" class="screen">
     <p class="kicker">Instructor Only</p>
-    <h1>채점자 페이지</h1>
+    <h1>Instructor Login</h1>
     <p class="subtitle">The Encounter — Listening Quiz</p>
 
     <div class="card">
-      <label for="pw-input">비밀번호</label>
+      <label for="pw-input">Password</label>
       <input type="password" id="pw-input" autocomplete="off">
       <p id="gate-error" class="error-msg" hidden></p>
-      <button id="btn-unlock" class="btn btn-primary mt">입장</button>
+      <button id="btn-unlock" class="btn btn-primary mt">Enter</button>
     </div>
   </section>
 
   <!-- ============ DASHBOARD ============ -->
   <section id="screen-dashboard" class="screen" hidden>
     <p class="kicker">Instructor Dashboard</p>
-    <h1>The Encounter — 채점 현황</h1>
+    <h1>The Encounter — Grading Dashboard</h1>
 
     <div class="card code-card">
-      <label for="code-input">오늘의 클래스 코드</label>
+      <label for="code-input">Today's class code</label>
       <div class="code-row">
-        <input type="text" id="code-input" placeholder="예: 0915">
-        <button id="btn-set-code" class="btn btn-secondary">코드 설정</button>
+        <input type="text" id="code-input" placeholder="e.g. 0915">
+        <button id="btn-set-code" class="btn btn-secondary">Set Code</button>
       </div>
       <p id="code-status" class="hint"></p>
     </div>
 
     <div class="stats-row">
-      <div class="stat"><span id="stat-count">0</span><label>제출 인원</label></div>
-      <div class="stat"><span id="stat-avg">–</span><label>평균 점수</label></div>
-      <div class="stat"><span id="stat-total">26</span><label>전체 학생 수</label></div>
+      <div class="stat"><span id="stat-count">0</span><label>Submitted</label></div>
+      <div class="stat"><span id="stat-avg">–</span><label>Average Score</label></div>
+      <div class="stat"><span id="stat-total">26</span><label>Total Students</label></div>
     </div>
 
     <div class="table-toolbar">
-      <button id="btn-refresh" class="btn btn-secondary">새로고침</button>
-      <button id="btn-export-csv" class="btn btn-secondary">CSV 다운로드</button>
+      <button id="btn-refresh" class="btn btn-secondary">Refresh</button>
+      <button id="btn-export-csv" class="btn btn-secondary">Download CSV</button>
     </div>
 
     <div id="table-wrap"></div>
