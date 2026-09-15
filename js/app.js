@@ -4,16 +4,17 @@
 
 const state = {
   studentName: null,
-  answers: {},
-  playCounts: {},
+  answers: {},        // { questionNum: selectedIndex }
+  playCounts: {},      // { audioSrc: number of plays used }
   submitted: false
 };
 
+// ---------- DOM refs ----------
 const screenLogin = document.getElementById("screen-login");
 const screenQuiz = document.getElementById("screen-quiz");
 const screenDone = document.getElementById("screen-done");
 
-const studentSelect = document.getElementById("student-select");
+const studentNameInput = document.getElementById("student-name-input");
 const classCodeInput = document.getElementById("class-code");
 const loginError = document.getElementById("login-error");
 const btnLogin = document.getElementById("btn-login");
@@ -30,50 +31,26 @@ const submitWarning = document.getElementById("submit-warning");
 const scoreDisplay = document.getElementById("score-display");
 const doneName = document.getElementById("done-name");
 
-STUDENTS.slice().sort((a, b) => a.localeCompare(b, "ko")).forEach(name => {
-  const opt = document.createElement("option");
-  opt.value = name;
-  opt.textContent = name;
-  studentSelect.appendChild(opt);
-});
-
-btnLogin.addEventListener("click", async () => {
-  const name = studentSelect.value;
+// ---------- Login ----------
+btnLogin.addEventListener("click", () => {
+  const name = studentNameInput.value.trim();
   const code = classCodeInput.value.trim();
 
   if (!name) {
-    showLoginError("Please select your name.");
+    showLoginError("Please enter your name.");
     return;
   }
   if (!code) {
-    showLoginError("Please enter today's class code.");
+    showLoginError("Please enter the password.");
+    return;
+  }
+  if (code !== STUDENT_PASSWORD) {
+    showLoginError("That password is not correct.");
     return;
   }
 
-  btnLogin.disabled = true;
-  btnLogin.textContent = "Checking...";
-
-  try {
-    const validCode = await fetchTodayCode();
-    if (validCode === null) {
-      showLoginError("Unable to verify the code. Please ask your teacher. (Admin: check APPS_SCRIPT_URL in config.js)");
-      btnLogin.disabled = false;
-      btnLogin.textContent = "Start Quiz";
-      return;
-    }
-    if (code !== validCode) {
-      showLoginError("That class code is not correct.");
-      btnLogin.disabled = false;
-      btnLogin.textContent = "Start Quiz";
-      return;
-    }
-    state.studentName = name;
-    startQuiz();
-  } catch (err) {
-    showLoginError("A network error occurred. Please try again.");
-    btnLogin.disabled = false;
-    btnLogin.textContent = "Start Quiz";
-  }
+  state.studentName = name;
+  startQuiz();
 });
 
 function showLoginError(msg) {
@@ -81,13 +58,7 @@ function showLoginError(msg) {
   loginError.hidden = false;
 }
 
-async function fetchTodayCode() {
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("PASTE_YOUR")) return null;
-  const res = await fetch(`${APPS_SCRIPT_URL}?action=getCode`);
-  const data = await res.json();
-  return (data.code || "").toString().trim();
-}
-
+// ---------- Build quiz screen ----------
 function startQuiz() {
   screenLogin.hidden = true;
   screenQuiz.hidden = false;
@@ -103,6 +74,7 @@ function renderQuizBlocks() {
     const blockEl = document.createElement("div");
     blockEl.className = "block";
 
+    // Audio player
     const nums = block.questions.map(q => q.num);
     const label = nums.length > 1
       ? `Audio for Questions ${nums[0]}–${nums[nums.length - 1]}`
@@ -144,6 +116,7 @@ function renderQuizBlocks() {
       }
     });
 
+    // Questions in this block
     block.questions.forEach(q => {
       const qEl = document.createElement("div");
       qEl.className = "question";
@@ -190,6 +163,7 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// ---------- PDF export ----------
 btnPdf.addEventListener("click", () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
@@ -249,10 +223,11 @@ btnPdf.addEventListener("click", () => {
     y += lineHeight * 0.6;
   });
 
-  const safeName = state.studentName.replace(/[^\w]+/g, "_");
+  const safeName = state.studentName.replace(/[^\w가-힣]+/g, "_");
   doc.save(`Encounter_Quiz_${safeName}.pdf`);
 });
 
+// ---------- Submit ----------
 btnSubmit.addEventListener("click", async () => {
   const answered = Object.keys(state.answers).length;
   if (answered < TOTAL_QUESTIONS) {
@@ -285,11 +260,13 @@ btnSubmit.addEventListener("click", async () => {
     if (APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
       await fetch(APPS_SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoids CORS preflight
         body: JSON.stringify(payload)
       });
     }
   } catch (err) {
+    // Even if the network call fails, still show the student their result
+    // and let the PDF be their record. The instructor can request a re-send.
     console.error("Submit failed:", err);
   }
 
